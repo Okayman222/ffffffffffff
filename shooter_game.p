@@ -5,7 +5,7 @@ mixer.music.load('space.ogg')
 mixer.music.play()
 fire_sound = mixer.Sound('fire.ogg')
 
-bullets = sprite.Group()
+bullets = sprite.Group(
 
 font.init()
 font1 = font.Font(None, 80)
