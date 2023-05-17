@@ -5,14 +5,14 @@ mixer.music.load('space.ogg')
 mixer.music.play()
 fire_sound = mixer.Sound('fire.ogg')
 
-bullets = sprite.Group(
+bullets = sprite.Group()
 
 font.init()
 font1 = font.Font(None, 80)
 win  = font1.render('YOU WIN', True, (255,255,255))
 lose  = font1.render('YOU LOSE', True, (180, 0,0))
 font2 = font.Font(None, 36)
-
+font3 = font.Font(None, 50)
 
 
 
@@ -21,8 +21,8 @@ score = 0
 
 
 
-win_width = 1920
-win_height = 1080
+win_width =700
+win_height = 500
 class GameSprite(sprite.Sprite):
     def __init__ (self, player_image, player_x, player_y,size_x, size_y, player_speed):
         super().__init__()
@@ -73,18 +73,27 @@ window = display.set_mode((win_width,win_height))
 display.set_caption('Шутер')
 background = transform.scale(image.load('galaxy.jpg'),(win_width,win_height))
 
+life = 3
+osteroids =sprite.Group()
+
+for i in range(2):
+    osteroid = Enemy('asteroid.png', randint(30, win_width - 30), -40, 80, 50, randint(1,3))
+    osteroids.add(osteroid)
+    
 
 monsters = sprite.Group()
 for i in range(5):
     monster = Enemy('ufo.png', randint(80, win_width - 80), -40, 80, 50, randint(1,3))
     monsters.add(monster)
+
+
 rocket = Player('rocket.png', 5, win_height - 100, 80, 100, 20)
 goal = 10
 max_lost = 10
 clock = time.Clock()
 finish = False
 run = True
-screen=display.set_mode((0,0),FULLSCREEN)
+screen=display.set_mode((0,0))
 while run:
     for e in event.get():
         if e.type == QUIT:
@@ -99,17 +108,34 @@ while run:
         rocket.move()
         monsters.draw(window)
         bullets.draw(window)
+        osteroids.draw(window)
         for i in bullets:
             i.move_3()
 
         for i in monsters:
+            i.move_2()
+        
+        for i in osteroids:
             i.move_2()
 
 
         text = font2.render('Счёт: ' + str(score), 1, (255,255,255))
         window.blit(text,(10,20))
         text_lose = font2.render('Пропущенно: ' + str(lost), 1, (255,255,255))
-        window.blit(text_lose,(10,50))  
+        window.blit(text_lose,(10,50)) 
+        if life == 3: 
+            life1 = font3.render(str(life),1,(0, 255, 0))
+        elif life == 2:
+            life1 = font3.render(str(life),1,(255, 255, 0))
+        else:
+            life1 = font3.render(str(life),1,(255, 0, 0))
+
+       
+
+        kill = sprite.groupcollide(osteroids, bullets, False, True)
+        
+
+            
 
         collides = sprite.groupcollide(monsters, bullets, True, True)
         for c in collides:
@@ -117,13 +143,39 @@ while run:
             monster = Enemy('ufo.png', randint(80, win_width - 80), -40, 80, 50, randint(1,3))
             monsters.add(monster)
 
-        if sprite.spritecollide(rocket, monsters, False) or lost >= max_lost:
+        if lost >= max_lost:
             finish = True
             window.blit(lose,(200,200))
 
         if score >= goal:
             finish = True
             window.blit(win,(200,200))
+        
+        if sprite.spritecollide(rocket, osteroids, False):
+            finish = True
+            window.blit(lose,(200,200))
+        
+        if sprite.spritecollide(rocket, monsters, True):
+            life -= 1
+        
+        if life == 0:
+            life1 = font3.render(str(life),1,(255, 0, 0))
+
+            finish = True
+            window.blit(lose,(200,200))
+            
+        window.blit(life1,(650,10))
+
+
+            
+
+
+        
+
+        
+
+
+        
 
 
         display.update()
